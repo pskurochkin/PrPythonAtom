@@ -4,11 +4,9 @@ import pickle
 class FileWriter:
 
     def __init__(self, path):
-        self._path = path
         if self.check_path(self._path):
+            self._path = path
             self._file = None
-        else:
-            self._file = self._path.replace(os.path.dirname(self._path) + '/', '')
 
     def __enter__(self):
         self._file = open(self._path, 'a')
@@ -19,13 +17,27 @@ class FileWriter:
         self._file = None
 
     def check_path(self, path):
-        return os.path.isdir(path)
+        return os.path.exists(path) and os.path.isfile(path)
+
+    path = property()
+
+    @path.getter
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, new_path):
+        if self.check_path(new_path):
+            self.__init__(new_path)
+
+    @path.deleter
+    def path(self):
+        self._path = ''
 
     def print_file(self):
         if self._file is None:
             print("Sorry, file does not exist.")
         else:
-            print("file: " + self._file)
             self._file = open(self._path, 'r')
             print(self._file.read())
             self._file.close()
